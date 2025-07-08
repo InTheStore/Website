@@ -36,3 +36,18 @@ class MenuItemAPITestCase(APITestCase):
 
         for item in data:
             self.assertNotIn(item['cafetype'], ['Coffee and Tea', 'Juices'])
+
+    def test_get_Juices_only(self):
+        """Test API returns only drink items when filtering by drinks"""
+        url = '/api/drinks/'  # Replace with your actual URL name
+        response = self.client.get(url, {'type': 'Juices'})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        data = response.json()
+
+        for item in data:
+            self.assertEqual(item['cafetype'], 'Juices')
+
+        for item in data:
+            self.assertNotIn(item['cafetype'], ['Coffee and Tea', 'Boba'])
