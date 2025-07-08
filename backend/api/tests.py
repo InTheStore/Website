@@ -50,4 +50,4 @@ class MenuItemAPITestCase(APITestCase):
             self.assertEqual(item['cafetype'], 'Juices')
 
         for item in data:
-            self.assertNotIn(item['cafetype'], ['Coffee and Te', 'Boba'])
+            self.assertNotIn(item['cafetype'], ['Coffee and Tea', 'Boba'])
