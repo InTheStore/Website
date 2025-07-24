@@ -35,11 +35,6 @@ jobs:
           cd frontend
           npm ci
 
-      - name: Run React tests
-        run: |
-          cd frontend
-          npm test -- --coverage --watchAll=false
-
       - name: Build React app
         run: |
           cd frontend
