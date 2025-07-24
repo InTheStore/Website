@@ -9,3 +9,4 @@ sqlparse
 python-dotenv
 mongoengine
 django-rest-framework-mongoengine
+gunicorn
