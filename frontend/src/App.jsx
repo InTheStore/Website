@@ -27,18 +27,10 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/" element={<GetShops />} />
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/register" element={<RegisterAndLogout />} />
-        <Route path="/shops" element={<GetShops />}></Route>
         <Route path="/coffee" element={<Coffee />}></Route>
         <Route path="/boba" element={<Boba />}></Route>
         <Route path="/juice" element={<Juice />}></Route>
