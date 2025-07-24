@@ -51,7 +51,7 @@ jobs:
       - name: Run Django tests
         env:
           MONGODB_URI: mongodb://admin:password@localhost:27017/test_db?authSource=admin
-          DJANGO_SETTINGS_MODULE: backend.settings.test
+          DJANGO_SETTINGS_MODULE: backend.settings
         run: |
           cd backend
           python manage.py test
