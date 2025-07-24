@@ -81,6 +81,37 @@ jobs:
           docker tag $FULL_IMAGE_NAME:$IMAGE_TAG $FULL_IMAGE_NAME:latest
           docker push $FULL_IMAGE_NAME:latest
 
+      - name: Setup restricted SSH access
+        run: |
+          # Remove open access rule (0.0.0.0/0)
+          echo "Removing open SSH access..."
+          aws ec2 revoke-security-group-ingress \
+            --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
+            --protocol tcp \
+            --port 22 \
+            --cidr 0.0.0.0/0 2>/dev/null || echo "Open access rule not found"
+
+          # Add your personal IP (optional - add as GitHub secret)
+          if [ ! -z "${{ secrets.MY_IP_ADDRESS }}" ]; then
+            echo "Adding personal IP access..."
+            aws ec2 authorize-security-group-ingress \
+              --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
+              --protocol tcp \
+              --port 22 \
+              --cidr ${{ secrets.MY_IP_ADDRESS }}/32 2>/dev/null || echo "Personal IP rule already exists"
+          fi
+
+          # Add GitHub Actions IP ranges
+          GITHUB_IPS=$(curl -s https://api.github.com/meta | jq -r '.actions[]')
+          echo "Adding GitHub Actions IP ranges..."
+          for ip in $GITHUB_IPS; do
+            aws ec2 authorize-security-group-ingress \
+              --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
+              --protocol tcp \
+              --port 22 \
+              --cidr $ip 2>/dev/null || echo "Rule for $ip already exists"
+          done
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -136,10 +167,10 @@ jobs:
             # Test if domain and API are accessible
             sleep 10
             echo "Testing website accessibility..."
-            curl -I https://park.parking.xyz || echo "Website not accessible"
+            curl -I https://cafes.caffenate.xyz || echo "Website not accessible"
 
             echo "Testing API accessibility..."
-            curl -I https://park.parking.xyz/api/ || echo "API not accessible"
+            curl -I https://cafes.caffenate.xyz/api/ || echo "API not accessible"
 
             echo "Testing backend direct access..."
             curl -I http://localhost:8000/ || echo "Backend not accessible directly"
