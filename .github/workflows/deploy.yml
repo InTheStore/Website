@@ -75,10 +75,11 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           cd frontend
-          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:$IMAGE_TAG .
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:$IMAGE_TAG
-          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:$IMAGE_TAG ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest
+          FULL_IMAGE_NAME=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}" | tr '[:upper:]' '[:lower:]')
+          docker build -t $FULL_IMAGE_NAME:$IMAGE_TAG .
+          docker push $FULL_IMAGE_NAME:$IMAGE_TAG
+          docker tag $FULL_IMAGE_NAME:$IMAGE_TAG $FULL_IMAGE_NAME:latest
+          docker push $FULL_IMAGE_NAME:latest
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
