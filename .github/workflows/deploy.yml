@@ -64,10 +64,11 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           cd backend
-          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:$IMAGE_TAG .
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:$IMAGE_TAG
-          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:$IMAGE_TAG ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:latest
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:latest
+          FULL_IMAGE_NAME=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}" | tr '[:upper:]' '[:lower:]')
+          docker build -t $FULL_IMAGE_NAME:$IMAGE_TAG .
+          docker push $FULL_IMAGE_NAME:$IMAGE_TAG
+          docker tag $FULL_IMAGE_NAME:$IMAGE_TAG $FULL_IMAGE_NAME:latest
+          docker push $FULL_IMAGE_NAME:latest
 
       - name: Build and push frontend image
         env:
