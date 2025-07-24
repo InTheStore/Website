@@ -81,6 +81,28 @@ jobs:
           docker tag $FULL_IMAGE_NAME:$IMAGE_TAG $FULL_IMAGE_NAME:latest
           docker push $FULL_IMAGE_NAME:latest
 
+      - name: Configure AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Update Security Group for GitHub Actions
+        run: |
+          # Get GitHub's current IP ranges for Actions
+          GITHUB_IPS=$(curl -s https://api.github.com/meta | jq -r '.actions[]')
+
+          echo "Adding GitHub Actions IP ranges to security group..."
+          for ip in $GITHUB_IPS; do
+            echo "Adding rule for IP range: $ip"
+            aws ec2 authorize-security-group-ingress \
+              --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
+              --protocol tcp \
+              --port 22 \
+              --cidr $ip 2>/dev/null || echo "Rule for $ip already exists or failed to add"
+          done
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -93,6 +115,11 @@ jobs:
 
             # Login to GitHub Container Registry
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Update environment variables for domain
+            export DOMAIN_NAME="cafes.caffenate.xyz"
+            export BACKEND_URL="https://$DOMAIN_NAME/api"
+            export FRONTEND_URL="https://$DOMAIN_NAME"
 
             # Pull latest images
             docker-compose pull
@@ -110,5 +137,39 @@ jobs:
             # Collect static files (if needed)
             docker-compose exec -T backend python manage.py collectstatic --noinput || true
 
-            # Reload Caddy
-            sudo systemctl reload caddy || true
+            # Update Caddyfile for domain
+            sudo tee /etc/caddy/Caddyfile > /dev/null <<EOF
+            cafes.caffenate.xyz {
+                # Frontend (React app)
+                handle_path /* {
+                    reverse_proxy localhost:3000
+                }
+                
+                # Backend API
+                handle_path /api/* {
+                    reverse_proxy localhost:8000
+                }
+            }
+            EOF
+
+            # Reload Caddy with new configuration
+            sudo systemctl reload caddy
+
+            # Test if domain is accessible
+            sleep 10
+            curl -I https://cafes.caffenate.xyz || echo "Domain not yet accessible - DNS may need time to propagate"
+
+      - name: Cleanup Security Group (Optional)
+        if: always()
+        run: |
+          # Optional: Remove the rules after deployment (more secure but may cause issues if job fails)
+          # Uncomment the lines below if you want to remove the rules after deployment
+          # GITHUB_IPS=$(curl -s https://api.github.com/meta | jq -r '.actions[]')
+          # for ip in $GITHUB_IPS; do
+          #   aws ec2 revoke-security-group-ingress \
+          #     --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
+          #     --protocol tcp \
+          #     --port 22 \
+          #     --cidr $ip 2>/dev/null || true
+          # done
+          echo "Security group cleanup skipped - rules will remain for future deployments"
