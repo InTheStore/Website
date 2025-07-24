@@ -19,8 +19,8 @@ WORKDIR /app
 # Install static file server
 RUN npm install -g serve
 
-# Copy built assets from build stage
-COPY --from=build /app/build ./build
+# Copy built assets from build stage (fix path)
+COPY --from=build /app/dist ./build
 
 EXPOSE 3000
 
