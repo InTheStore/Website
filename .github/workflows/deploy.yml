@@ -61,18 +61,13 @@ jobs:
 
       - name: Build and push backend image
         env:
-        IMAGE_TAG: ${{ github.sha }}
-        REGISTRY: ghcr.io
-        IMAGE_NAME_BACKEND: InTheStore/website
+          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_NAME_BACKEND: inthestore
         run: |
-        # Lowercase the image name to satisfy Docker/ghcr
           IMAGE_NAME_BACKEND_LOWER=$(echo "$IMAGE_NAME_BACKEND" | tr '[:upper:]' '[:lower:]')
-
           cd backend
-
           docker build -t $REGISTRY/$IMAGE_NAME_BACKEND_LOWER:$IMAGE_TAG .
           docker push $REGISTRY/$IMAGE_NAME_BACKEND_LOWER:$IMAGE_TAG
-
           docker tag $REGISTRY/$IMAGE_NAME_BACKEND_LOWER:$IMAGE_TAG $REGISTRY/$IMAGE_NAME_BACKEND_LOWER:latest
           docker push $REGISTRY/$IMAGE_NAME_BACKEND_LOWER:latest
 
