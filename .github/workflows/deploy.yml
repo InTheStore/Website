@@ -11,6 +11,10 @@ env:
   IMAGE_NAME_BACKEND: ${{ github.repository }}/backend
   IMAGE_NAME_FRONTEND: ${{ github.repository }}/frontend
 
+permissions:
+  packages: write
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
