@@ -89,7 +89,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             # Navigate to app directory
-            cd ~/Website
+            cd /opt/your-app
 
             # Login to GitHub Container Registry
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -118,14 +118,14 @@ jobs:
             # Update Caddyfile for domain
             sudo tee /etc/caddy/Caddyfile > /dev/null <<EOF
             cafes.caffenate.xyz {
-                # Frontend (React app)
-                handle_path /* {
-                    reverse_proxy localhost:3000
+                # Backend API - MUST come before frontend catch-all
+                handle /api/* {
+                    reverse_proxy localhost:8000
                 }
                 
-                # Backend API
-                handle_path /api/* {
-                    reverse_proxy localhost:8000
+                # Frontend (React app) - This should be LAST as it's a catch-all
+                handle /* {
+                    reverse_proxy localhost:3000
                 }
             }
             EOF
@@ -133,6 +133,21 @@ jobs:
             # Reload Caddy with new configuration
             sudo systemctl reload caddy
 
-            # Test if domain is accessible
+            # Test if domain and API are accessible
             sleep 10
-            curl -I https://cafes.caffenate.xyz || echo "Domain not yet accessible - DNS may need time to propagate"
+            echo "Testing website accessibility..."
+            curl -I https://park.parking.xyz || echo "Website not accessible"
+
+            echo "Testing API accessibility..."
+            curl -I https://park.parking.xyz/api/ || echo "API not accessible"
+
+            echo "Testing backend direct access..."
+            curl -I http://localhost:8000/ || echo "Backend not accessible directly"
+
+            # Check Django logs for any errors
+            echo "Checking backend logs..."
+            docker-compose logs --tail=20 django-backend
+
+            # Check Caddy logs
+            echo "Checking Caddy logs..."
+            sudo journalctl -u caddy --no-pager --lines=10
