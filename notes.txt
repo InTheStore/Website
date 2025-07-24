@@ -1,0 +1,21 @@
+Python virtual environment
+python<version> -m venv <virtual-environment-name>
+source env/bin/activate
+
+Install All requirements
+pip install -r requirements.txt
+
+gunicorn - to run the server on a socket
+caddy - reverse proxy
+
+install npm
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+
+activate gunicorn
+sudo systemctl start gunicorn.socket
+sudo systemctl enable gunicorn.socket
+
+activate caddy
+
+All NPM packages
+npm install axios react-router-dom jwt-decode
