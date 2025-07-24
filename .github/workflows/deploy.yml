@@ -54,7 +54,7 @@ jobs:
           DJANGO_SETTINGS_MODULE: backend.settings
         run: |
           cd backend
-          python manage.py test
+          python manage.py test --keepdb
 
       # Frontend Tests
       - name: Set up Node.js
