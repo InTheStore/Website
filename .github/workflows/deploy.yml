@@ -88,41 +88,37 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Setup restricted SSH access
+      - name: Get current runner IP and add to security group
         run: |
-          # Get current security group rules to avoid duplicates
-          echo "Checking existing security group rules..."
-          EXISTING_RULES=$(aws ec2 describe-security-groups \
-            --group-ids ${{ secrets.EC2_SECURITY_GROUP_ID }} \
-            --query 'SecurityGroups[0].IpPermissions[?FromPort==`22`].IpRanges[].CidrIp' \
-            --output text)
+          # Get the current IP of the GitHub Actions runner
+          RUNNER_IP=$(curl -s https://ipinfo.io/ip)
+          echo "Current GitHub Actions runner IP: $RUNNER_IP"
 
-          # Get GitHub's current IP ranges for Actions (limit to first 10 for faster deployment)
-          GITHUB_IPS=$(curl -s https://api.github.com/meta | jq -r '.actions[]' | head -10)
+          # Add this specific IP to security group
+          aws ec2 authorize-security-group-ingress \
+            --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
+            --protocol tcp \
+            --port 22 \
+            --cidr $RUNNER_IP/32 2>/dev/null || echo "IP $RUNNER_IP already has access"
 
-          echo "Adding essential GitHub Actions IP ranges..."
-          RULES_ADDED=0
-          for ip in $GITHUB_IPS; do
-            # Check if rule already exists
-            if echo "$EXISTING_RULES" | grep -q "$ip"; then
-              echo "Rule for $ip already exists (skipping)"
-            else
-              echo "Adding rule for IP range: $ip"
-              aws ec2 authorize-security-group-ingress \
-                --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
-                --protocol tcp \
-                --port 22 \
-                --cidr $ip 2>/dev/null && RULES_ADDED=$((RULES_ADDED + 1)) || echo "Failed to add $ip"
-            fi
-            
-            # Stop after adding 10 rules to speed up deployment
-            if [ $RULES_ADDED -ge 10 ]; then
-              echo "Added sufficient GitHub Actions IP ranges for deployment"
-              break
-            fi
-          done
+          echo "Added runner IP $RUNNER_IP to security group"
 
-          echo "GitHub Actions SSH access configured successfully"
+      # Security group already configured manually - skipping automatic updates
+
+      - name: Debug connection
+        run: |
+          echo "Testing connectivity to EC2 instance..."
+          echo "Host: ${{ secrets.EC2_HOST }}"
+
+          # Test if port 22 is open
+          timeout 10 bash -c "</dev/tcp/${{ secrets.EC2_HOST }}/22" && echo "Port 22 is open" || echo "Port 22 is closed or filtered"
+
+          # Check if we can resolve the hostname
+          nslookup ${{ secrets.EC2_HOST }} || echo "DNS resolution failed"
+
+          # Try to connect with verbose SSH to see what's happening
+          echo "Attempting SSH connection with verbose output..."
+          ssh -v -o ConnectTimeout=10 -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} echo "SSH test successful" || echo "SSH connection failed"
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
