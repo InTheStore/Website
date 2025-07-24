@@ -81,36 +81,48 @@ jobs:
           docker tag $FULL_IMAGE_NAME:$IMAGE_TAG $FULL_IMAGE_NAME:latest
           docker push $FULL_IMAGE_NAME:latest
 
+      - name: Configure AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
       - name: Setup restricted SSH access
         run: |
-          # Remove open access rule (0.0.0.0/0)
-          echo "Removing open SSH access..."
-          aws ec2 revoke-security-group-ingress \
-            --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
-            --protocol tcp \
-            --port 22 \
-            --cidr 0.0.0.0/0 2>/dev/null || echo "Open access rule not found"
+          # Get current security group rules to avoid duplicates
+          echo "Checking existing security group rules..."
+          EXISTING_RULES=$(aws ec2 describe-security-groups \
+            --group-ids ${{ secrets.EC2_SECURITY_GROUP_ID }} \
+            --query 'SecurityGroups[0].IpPermissions[?FromPort==`22`].IpRanges[].CidrIp' \
+            --output text)
 
-          # Add your personal IP (optional - add as GitHub secret)
-          if [ ! -z "${{ secrets.MY_IP_ADDRESS }}" ]; then
-            echo "Adding personal IP access..."
-            aws ec2 authorize-security-group-ingress \
-              --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
-              --protocol tcp \
-              --port 22 \
-              --cidr ${{ secrets.MY_IP_ADDRESS }}/32 2>/dev/null || echo "Personal IP rule already exists"
-          fi
+          # Get GitHub's current IP ranges for Actions (limit to first 10 for faster deployment)
+          GITHUB_IPS=$(curl -s https://api.github.com/meta | jq -r '.actions[]' | head -10)
 
-          # Add GitHub Actions IP ranges
-          GITHUB_IPS=$(curl -s https://api.github.com/meta | jq -r '.actions[]')
-          echo "Adding GitHub Actions IP ranges..."
+          echo "Adding essential GitHub Actions IP ranges..."
+          RULES_ADDED=0
           for ip in $GITHUB_IPS; do
-            aws ec2 authorize-security-group-ingress \
-              --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
-              --protocol tcp \
-              --port 22 \
-              --cidr $ip 2>/dev/null || echo "Rule for $ip already exists"
+            # Check if rule already exists
+            if echo "$EXISTING_RULES" | grep -q "$ip"; then
+              echo "Rule for $ip already exists (skipping)"
+            else
+              echo "Adding rule for IP range: $ip"
+              aws ec2 authorize-security-group-ingress \
+                --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
+                --protocol tcp \
+                --port 22 \
+                --cidr $ip 2>/dev/null && RULES_ADDED=$((RULES_ADDED + 1)) || echo "Failed to add $ip"
+            fi
+            
+            # Stop after adding 10 rules to speed up deployment
+            if [ $RULES_ADDED -ge 10 ]; then
+              echo "Added sufficient GitHub Actions IP ranges for deployment"
+              break
+            fi
           done
+
+          echo "GitHub Actions SSH access configured successfully"
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
