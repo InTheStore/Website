@@ -3,9 +3,9 @@ FROM node:18-alpine as build
 
 WORKDIR /app
 
-# Copy package files
+# Install all deps including devDependencies for build
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Copy source code and build
 COPY . .
@@ -16,7 +16,7 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Install serve globally
+# Install static file server
 RUN npm install -g serve
 
 # Copy built assets from build stage
@@ -24,5 +24,5 @@ COPY --from=build /app/build ./build
 
 EXPOSE 3000
 
-# Serve the built React app
+# Serve the built app
 CMD ["serve", "-s", "build", "-l", "3000"]
