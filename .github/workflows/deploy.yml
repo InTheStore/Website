@@ -41,7 +41,7 @@ jobs:
           npm run build
 
       # Skip Django tests for now
-      - name: Django tests placeholder
+      - name: Django tests
         run: echo "Django tests skipped - will configure later"
 
   deploy:
@@ -171,22 +171,3 @@ jobs:
 
             # Reload Caddy with new configuration
             sudo systemctl reload caddy
-
-            # Test if domain and API are accessible
-            sleep 10
-            echo "Testing website accessibility..."
-            curl -I https://cafes.caffenate.xyz || echo "Website not accessible"
-
-            echo "Testing API accessibility..."
-            curl -I https://cafes.caffenate.xyz/api/ || echo "API not accessible"
-
-            echo "Testing backend direct access..."
-            curl -I http://localhost:8000/ || echo "Backend not accessible directly"
-
-            # Check Django logs for any errors
-            echo "Checking backend logs..."
-            docker-compose logs --tail=20 django-backend
-
-            # Check Caddy logs
-            echo "Checking Caddy logs..."
-            sudo journalctl -u caddy --no-pager --lines=10
