@@ -1,7 +1,7 @@
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import React from "react";
-import "../styles/ShopGrid.css";
+// import "../styles/ShopGrid.css";
 
 function ShopGrid(props) {
   // const shops = props;

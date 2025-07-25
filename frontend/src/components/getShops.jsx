@@ -4,6 +4,7 @@ import NavBar from "./navbar";
 import ShopGrid from "./ShopGrid";
 import LoadingIndicator from "./LoadingIndicator";
 import "../styles/Shops.css";
+import Footer from "./Footer";
 
 function GetShops(props) {
   const [shops, setShops] = useState(null);
@@ -71,7 +72,7 @@ function GetShops(props) {
       <NavBar />
       <div
         style={{
-          backgroundColor: "#c9b194",
+          backgroundColor: props.color,
           minHeight: "100vh",
           width: "100vw",
           margin: 0,
@@ -81,6 +82,7 @@ function GetShops(props) {
       >
         {loading ? <LoadingIndicator /> : <ShopGrid shops={shops} />}
       </div>
+      <Footer />
     </div>
   );
 }
