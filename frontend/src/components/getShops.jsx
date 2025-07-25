@@ -69,7 +69,18 @@ function GetShops(props) {
   return (
     <div className="Shops">
       <NavBar />
-      <div>{loading ? <LoadingIndicator /> : <ShopGrid shops={shops} />}</div>
+      <div
+        style={{
+          backgroundColor: "#c9b194",
+          minHeight: "100vh",
+          width: "100vw",
+          margin: 0,
+          padding: "1rem",
+          boxSizing: "border-box", // Ensures padding doesn’t cause overflow
+        }}
+      >
+        {loading ? <LoadingIndicator /> : <ShopGrid shops={shops} />}
+      </div>
     </div>
   );
 }

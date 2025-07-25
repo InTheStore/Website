@@ -15,7 +15,7 @@ function NavBar() {
         <Navbar.Toggle aria-controls="main-navbar" />
         <Navbar.Collapse id="main-navbar">
           <Nav className="w-100 flex-column flex-lg-row justify-content-center text-center">
-            <Nav.Link as={Link} to="/shops" className="my-2 my-lg-0 mx-lg-3">
+            <Nav.Link as={Link} to="/" className="my-2 my-lg-0 mx-lg-3">
               Home
             </Nav.Link>
             <Nav.Link as={Link} to="/coffee" className="my-2 my-lg-0 mx-lg-3">
