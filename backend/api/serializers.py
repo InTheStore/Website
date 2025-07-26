@@ -23,5 +23,5 @@ class NoteSerializer(serializers.ModelSerializer):
 class CafeSerializer(sd.DocumentSerializer):
     class Meta:
         model = Drink
-        fields = ['id', 'cafetype', 'name', 'Location']
-        read_only_fields = ['id', 'shoptype', 'name', 'address']
+        fields = ['id', 'cafetype', 'name', 'Location', 'maps_url']
+        read_only_fields = ['id', 'shoptype', 'name', 'address', 'maps_url']

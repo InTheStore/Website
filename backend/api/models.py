@@ -24,3 +24,4 @@ class Drink(me.Document):
     name = me.StringField()
     Location = me.EmbeddedDocumentField(Location)
     cafetype = me.StringField()
+    maps_url = me.StringField()

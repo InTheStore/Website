@@ -3,6 +3,29 @@ import Card from "react-bootstrap/Card";
 import React from "react";
 // import "../styles/ShopGrid.css";
 
+function MapButton({ url, children }) {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        display: "inline-block",
+        padding: "8px 16px",
+        backgroundColor: "#007bff",
+        color: "white",
+        textDecoration: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
+      }}
+    >
+      {children}
+    </a>
+  );
+}
+
+// Usage example:
+
 function ShopGrid(props) {
   // const shops = props;
   // console.log(props);
@@ -14,6 +37,7 @@ function ShopGrid(props) {
           name,
           cafetype,
           Location: { address, city, state, zipcode },
+          maps_url,
         }) => (
           <Card
             key={id}
@@ -35,6 +59,7 @@ function ShopGrid(props) {
                 {city}, {state} {zipcode}
               </Card.Text>
               {/* <Button variant="primary">View Details</Button> */}
+              <MapButton url={maps_url}>Open Maps</MapButton>
             </Card.Body>
           </Card>
         )
