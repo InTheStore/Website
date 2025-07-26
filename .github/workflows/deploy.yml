@@ -151,6 +151,10 @@ jobs:
             # Check if services are running
             docker-compose ps
 
+            # Run Django migrations
+            echo "Running Django migrations..."
+            docker-compose exec -T backend python manage.py migrate
+
             # Collect static files (if needed)
             docker-compose exec -T backend python manage.py collectstatic --noinput || true
 
