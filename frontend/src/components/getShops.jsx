@@ -22,11 +22,11 @@ function GetShops(props) {
         .then((res) => res.data)
         .then((data) => {
           setShops(data);
-          setLoading(false); // ✅ done loading
+          setLoading(false);
         })
         .catch((err) => {
           alert(err);
-          setLoading(false); // ✅ still stop loading even if failed
+          setLoading(false);
         });
     } else if (city) {
       api
@@ -34,11 +34,11 @@ function GetShops(props) {
         .then((res) => res.data)
         .then((data) => {
           setShops(data);
-          setLoading(false); // ✅ done loading
+          setLoading(false);
         })
         .catch((err) => {
           alert(err);
-          setLoading(false); // ✅ still stop loading even if failed
+          setLoading(false);
         });
     } else if (cafetype) {
       api
@@ -46,11 +46,11 @@ function GetShops(props) {
         .then((res) => res.data)
         .then((data) => {
           setShops(data);
-          setLoading(false); // ✅ done loading
+          setLoading(false);
         })
         .catch((err) => {
           alert(err);
-          setLoading(false); // ✅ still stop loading even if failed
+          setLoading(false);
         });
     } else {
       api
@@ -58,11 +58,11 @@ function GetShops(props) {
         .then((res) => res.data)
         .then((data) => {
           setShops(data);
-          setLoading(false); // ✅ done loading
+          setLoading(false);
         })
         .catch((err) => {
           alert(err);
-          setLoading(false); // ✅ still stop loading even if failed
+          setLoading(false);
         });
     }
   };
@@ -77,7 +77,7 @@ function GetShops(props) {
           width: "100vw",
           margin: 0,
           padding: "1rem",
-          boxSizing: "border-box", // Ensures padding doesn’t cause overflow
+          boxSizing: "border-box",
         }}
       >
         {loading ? <LoadingIndicator /> : <ShopGrid shops={shops} />}

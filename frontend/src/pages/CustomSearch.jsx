@@ -4,14 +4,6 @@ import { Form, Button, Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-// function Search() {
-
-//   const handleSearch = (e) => {
-//     e.preventDefault();
-//     navigate(`/search-results?city=${city}&type=${type}`);
-//   };
-// }
-
 function CustomSearch() {
   const navigate = useNavigate();
 

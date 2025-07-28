@@ -12,7 +12,7 @@ function MapButton({ url, children }) {
       style={{
         display: "inline-block",
         padding: "8px 16px",
-        backgroundColor: "#007bff",
+        backgroundColor: "#A08963",
         color: "white",
         textDecoration: "none",
         borderRadius: "4px",
