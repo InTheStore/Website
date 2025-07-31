@@ -62,9 +62,9 @@ npm run dev
 - Using the provided deploy.yml, deploy the website automatically to the ec2 instance using Github Actions
 
 ## MongoDB 
-- the expected document type that the backend expects is of this format:
+- the expected document type that the backend expects
   
-| Name      |Location                                                                                              | Type           | Map Url                                                                                   |
+| name      |Location                                                                                              | cafetype       | maps_url                                                                                  |
 |-----------|------------------------------------------------------------------------------------------------------|----------------|-------------------------------------------------------------------------------------------|
 |About Time |{"address":"3287 Wilshire Blvd B","city":"Los Angeles","state":"CA","zipcode":{"$numberInt":"90010"}} | Coffee and Tea |  https://www.google.com/maps/search/?api=1&query=About%20Time%203287%20Wilshire%20Blvd%20B|
 
